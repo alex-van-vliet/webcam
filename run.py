@@ -14,7 +14,7 @@ def ms_time():
 parser = argparse.ArgumentParser(description='Take images from webcam.')
 parser.add_argument('--width', action='store', default=640, type=int)
 parser.add_argument('--height', action='store', default=480, type=int)
-parser.add_argument('--grayscale', action='store_true', default=False)
+parser.add_argument('--color', action='store_true', default=False)
 parser.add_argument('--directory', action='store', default='images')
 parser.add_argument('--frequency', action='store', default=0, type=float, help="0 to take images as fast as possible")
 args = parser.parse_args()
@@ -28,7 +28,7 @@ print("Height:", height)
 if height <= 0:
     print("Invalid height")
     exit(1)
-gray = args.grayscale
+gray = not args.color
 print("Grayscale:", gray)
 directory = os.path.abspath(args.directory) + "-" + str(ms_time())
 print("Directory:", directory)
