@@ -15,20 +15,25 @@ parser.add_argument('--directory', action='store', default='images')
 args = parser.parse_args()
 width = args.width
 print("Width:", width)
+if width <= 0:
+    print("Invalid width")
+    exit(1)
 height = args.height
 print("Height:", height)
+if height <= 0:
+    print("Invalid height")
+    exit(1)
 gray = args.grayscale
 print("Grayscale:", gray)
 directory = os.path.abspath(args.directory) + "-" + str(ms_time())
 print("Directory:", directory)
+os.makedirs(directory, exist_ok=True)
 
 cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
 
 cap = cv2.VideoCapture(0)
 cap.set(3, width)
 cap.set(4, height)
-
-os.makedirs(directory, exist_ok=True)
 
 i = 0
 while True:
