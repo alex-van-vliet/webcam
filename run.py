@@ -1,8 +1,12 @@
+import roslib
 import numpy as np
 import cv2
 import time
 import os
 import argparse
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
 
 def ms_time():
     return int(round(time.time() * 1000))
@@ -34,7 +38,8 @@ print("Frequency:", frequency)
 if frequency < 0:
     print("Invalid frequency")
     exit(1)
-delay = 1000 / frequency
+if frequency:
+    delay = 1000 / frequency
 
 cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
 
@@ -45,8 +50,9 @@ cap.set(4, height)
 i = 0
 while True:
     # Capture frame-by-frame
-    start_time = time.time() * 1000
-    expected_next = start_time + delay
+    if frequency:
+        start_time = time.time() * 1000
+        expected_next = start_time + delay
     name = str(i) + "-" + str(ms_time()) + ".png"
     ret, frame = cap.read()
     # Our operations on the frame come here
@@ -58,11 +64,12 @@ while True:
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
         break
-    real_delay = expected_next - time.time() * 1000
-    if real_delay < 0:
-        print('Lagging')
-    else:
-        time.sleep(real_delay / 1000)
+    if frequency:
+        real_delay = expected_next - time.time() * 1000
+        if real_delay < 0:
+            print('Lagging')
+        else:
+            time.sleep(real_delay / 1000)
     i += 1   
 
 # When everything done, release the capture
