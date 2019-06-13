@@ -12,6 +12,7 @@ parser.add_argument('--width', action='store', default=640, type=int)
 parser.add_argument('--height', action='store', default=480, type=int)
 parser.add_argument('--grayscale', action='store_true', default=False)
 parser.add_argument('--directory', action='store', default='images')
+parser.add_argument('--frequency', action='store', default=0, type=float, help="0 to take images as fast as possible")
 args = parser.parse_args()
 width = args.width
 print("Width:", width)
@@ -28,6 +29,12 @@ print("Grayscale:", gray)
 directory = os.path.abspath(args.directory) + "-" + str(ms_time())
 print("Directory:", directory)
 os.makedirs(directory, exist_ok=True)
+frequency = args.frequency
+print("Frequency:", frequency)
+if frequency < 0:
+    print("Invalid frequency")
+    exit(1)
+delay = 1000 / frequency
 
 cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
 
@@ -38,6 +45,8 @@ cap.set(4, height)
 i = 0
 while True:
     # Capture frame-by-frame
+    start_time = time.time() * 1000
+    expected_next = start_time + delay
     name = str(i) + "-" + str(ms_time()) + ".png"
     ret, frame = cap.read()
     # Our operations on the frame come here
@@ -49,6 +58,11 @@ while True:
     key = cv2.waitKey(1) & 0xFF
     if key == ord('q'):
         break
+    real_delay = expected_next - time.time() * 1000
+    if real_delay < 0:
+        print('Lagging')
+    else:
+        time.sleep(real_delay / 1000)
     i += 1   
 
 # When everything done, release the capture
