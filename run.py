@@ -1,3 +1,4 @@
+#!python
 import roslib
 import numpy as np
 import cv2
@@ -17,6 +18,7 @@ parser.add_argument('--height', action='store', default=480, type=int)
 parser.add_argument('--color', action='store_true', default=False)
 parser.add_argument('--directory', action='store', default='images')
 parser.add_argument('--frequency', action='store', default=0, type=float, help="0 to take images as fast as possible")
+parser.add_argument('--topic', action='store', default=None)
 args = parser.parse_args()
 width = args.width
 print("Width:", width)
@@ -32,7 +34,7 @@ gray = not args.color
 print("Grayscale:", gray)
 directory = os.path.abspath(args.directory) + "-" + str(ms_time())
 print("Directory:", directory)
-os.makedirs(directory, exist_ok=True)
+os.makedirs(directory)#, exist_ok=True) Considering py2 because some dependencies don't work on py3
 frequency = args.frequency
 print("Frequency:", frequency)
 if frequency < 0:
@@ -40,12 +42,20 @@ if frequency < 0:
     exit(1)
 if frequency:
     delay = 1000 / frequency
+topic = args.topic
+print("Topic:", topic)
 
 cv2.namedWindow('frame', cv2.WINDOW_NORMAL)
 
 cap = cv2.VideoCapture(0)
 cap.set(3, width)
 cap.set(4, height)
+
+if topic:
+    bridge = CvBridge()
+    publisher = rospy.Publisher(topic, Image, queue_size=10)
+
+rospy.init_node('webcam', anonymous=True)
 
 i = 0
 while True:
@@ -59,6 +69,8 @@ while True:
     if gray:
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # Display the resulting frame
+        if topic:
+            publisher.publish(bridge.cv2_to_imgmsg(frame, "8UC1"))
     cv2.imwrite(os.path.join(directory, name), frame)
     cv2.imshow('frame', frame)
     key = cv2.waitKey(1) & 0xFF

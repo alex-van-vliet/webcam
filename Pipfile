@@ -9,6 +9,7 @@ verify_ssl = true
 pygame = "*"
 numpy = "*"
 opencv-python = "*"
+rospkg = "*"
 
 [requires]
 python_version = "3.6"
